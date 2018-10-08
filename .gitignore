@@ -1,0 +1,5 @@
+*.pyc
+*.sw[mnop]
+*.egg-info
+.pytest_cache/
+
