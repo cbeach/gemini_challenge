@@ -4,8 +4,8 @@ import re
 from click.testing import CliRunner
 
 from ..jobcoin import config
+from ..jobcoin import cli
 from ..jobcoin import jobcoin
-from .. import cli
 
 
 @pytest.fixture
@@ -19,20 +19,15 @@ def test_content(response):
 
 
 def test_cli_basic():
-    runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    assert 'Welcome to the Jobcoin mixer' in result.output
+    targets = ['1234', '4321']
+    result = cli.main(targets)
+    assert result['exit_code'] == 0
+    assert result['mix_addrs']['dst'] == targets
 
 
-def test_cli_creates_address():
-    runner = CliRunner()
-    address_create_output = runner.invoke(cli.main, input='1234,4321').output
-    output_re = re.compile(
-        r'You may now send Jobcoins to address [0-9a-zA-Z]{32}. '
-        'They will be mixed and sent to your destination addresses.'
-    )
-    assert output_re.search(address_create_output) is not None
+#def test_cli_creates_address():
+#    runner = CliRunner()
+#    address_create_output = cli.main(['1234', '4321'])
 
 
 def test_transfer():
