@@ -25,11 +25,6 @@ def test_cli_basic():
     assert result['mix_addrs']['dst'] == targets
 
 
-#def test_cli_creates_address():
-#    runner = CliRunner()
-#    address_create_output = cli.main(['1234', '4321'])
-
-
 def test_transfer():
     res = jobcoin.transfer('test_address_from', 'test_address_to', 1.0)
     assert res['status'] == 'OK'

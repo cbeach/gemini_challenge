@@ -22,6 +22,3 @@ def test_default_create_mixer_addresses():
     assert 'duration' in addrs
     assert addrs['dst'] == targets
 
-#def test_create_mixer_addresses_with_targets():
-#    assert len(res['transactions']) > 0
-

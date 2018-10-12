@@ -1,16 +1,97 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
+import json
+import random
 import sys
+import uuid
+
 from jobcoin.cli import main
+from jobcoin.config import *
+from jobcoin.jobcoin import address_info, transfer
+
+def normalize(list_of_numbers):
+    """
+        arguments: 
+            list_of_numbers: Aren't descriptive variable names nice.
+        returns:
+            a normalized list of floats, such that sum(normalized) ~= 1.0
+    """
+    s = sum(list_of_numbers)
+    normalized = list(map(lambda x: x / s, list_of_numbers))
+    assert abs(sum(normalized) - 1) < 0.00001
+    return normalized
+
+
+def write_db(db):
+    with open(JOBCOIN_DB, 'w') as fp:
+        json.dump(db, fp)   
+
+
+def perform_transactions(from_addrs, to_addrs, amounts, db):
+    assert len(from_addrs) == len(to_addrs)
+    assert len(from_addrs) == len(amounts)
+
+    new_transactions = [
+        {
+            'from_addr': i[0],
+            'to_addr': i[1],
+            'amount': i[2]
+        } for i in zip(from_addrs, to_addrs, amounts)]
+
+    if 'pending_transactions' not in db:
+        db['pending_transactions'] = new_transactions
+    else:
+        db['pending_transactions'].extend(new_transactions)
+
+    # shuffle the database so that the transactions don't get processed in easy to track clusters
+    random.shuffle(db['pending_transactions'])
+    write_db(db)
+
+    while len(db['pending_transactions']) > 0:
+        # TODO: Loads and loads and LOADS of error handling
+        trans = db['pending_transactions'].pop(0)
+        transfer(trans['from_addr'], trans['to_addr'], trans['amount'])
+
+        # write the db to disk after every transaction this minimizes the amount of time
+        # that it stays out of sync
+        write_db(db)
+
+
+
+def main():
+    with open(JOBCOIN_DB, 'r') as fp:
+        db = json.load(fp)
+
+    try:
+        # Do this in a try except block so that we can use the finally suite to make sure that our
+        # db file gets written.
+        for i in db['mappings']:
+            info = address_info(i['src'])
+            balance = float(info['balance'])
+            src_addr = i['src']
+            dst_addrs = i['dst']
+            
+            distribution = normalize([random.random() for j in range(len(dst_addrs))])
+            normed_dist = list(map(lambda x: x * balance, distribution))
+
+            # There is a possibility of getting some rounding errors. This line should bring
+            # the sum of normed_dist back into line with the actual balance
+            # Addendum: There's a bloody 1e-14 _MOCKING_ me.
+            normed_dist[-1] += balance - sum(normed_dist)
+
+            random.shuffle(dst_addrs)
+            if balance > 0:
+                transfer(src_addr, HOUSE_ADDRESS, balance)
+                perform_transactions([HOUSE_ADDRESS] * len(i['dst']), i['dst'], normed_dist, db)
+
+    except:
+        # Re-raise the exception because I'm not a jerk.
+        raise
+    finally:
+        # Make my best effort to write the db file.
+        print('Writing db file')
+        write_db(db)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--targets', nargs='+', help='The accounts that the jobCoins should be sent to')
-    parser.add_argument('--branching', type=int, default=5, help='The number of addresses that the jobCoins should be sent to')
-    parser.add_argument('--duration', type=int, default=3600, help='How long should I take to transfer the jobcoins?')
-    args = parser.parse_args()
-    print(args.targets)
-
-    #sys.exit(main(args.targets, args.branching, args.duration))
-    
+    main()
