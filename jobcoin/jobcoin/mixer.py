@@ -28,6 +28,7 @@ def create_mixer_addresses(branching_factor=5, targets=None, duration=60):
             duration: an integer specifying how long to spread the transfers out over
     """
 
+    # Did the user specify some target accounts?
     if targets and isinstance(targets, list):
         dst = targets
     else:
@@ -40,7 +41,9 @@ def create_mixer_addresses(branching_factor=5, targets=None, duration=60):
         "duration": duration,
     }
 
+    # Check the cases for writing the db file
     if os.path.isfile(config.JOBCOIN_DB):
+        # The file exist.
         with open(config.JOBCOIN_DB, 'r') as fp:
             try:
                 db = json.load(fp)
@@ -48,14 +51,17 @@ def create_mixer_addresses(branching_factor=5, targets=None, duration=60):
                 print('the database contains corrupt data')
                 db = {}
 
+            # Add the new addresses to the db
             if 'mappings' in db:
                 db['mappings'].append(addrs)
             else:
                 db['mappings'] = [addrs]
     else:
+        # The file does not exist
         db = {}
 
     with open(config.JOBCOIN_DB, 'w') as fp:
+        print('Writing db to {}'.format(config.JOBCOIN_DB))
         json.dump(db, fp) 
 
     return addrs

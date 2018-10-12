@@ -51,12 +51,13 @@ def perform_transactions(from_addrs, to_addrs, amounts, db):
     while len(db['pending_transactions']) > 0:
         # TODO: Loads and loads and LOADS of error handling
         trans = db['pending_transactions'].pop(0)
-        transfer(trans['from_addr'], trans['to_addr'], trans['amount'])
+        transfer_ammount = trans['amount'] * (1 - MIXING_FEE)
+        transfer(trans['from_addr'], trans['to_addr'], transfer_ammount)
+        print('transfer({}, {}, {})'.format(trans['from_addr'], trans['to_addr'], transfer_ammount))
 
         # write the db to disk after every transaction this minimizes the amount of time
         # that it stays out of sync
         write_db(db)
-
 
 
 def main():
@@ -84,14 +85,17 @@ def main():
             if balance > 0:
                 transfer(src_addr, HOUSE_ADDRESS, balance)
                 perform_transactions([HOUSE_ADDRESS] * len(i['dst']), i['dst'], normed_dist, db)
+            if len(db['pending_transactions']) > 0:
+                perform_transactions([], [], [], db)
+                
 
-    except:
+    except Exception as e:
         # Re-raise the exception because I'm not a jerk.
-        raise
+        raise e
     finally:
         # Make my best effort to write the db file.
-        print('Writing db file')
         write_db(db)
 
 if __name__ == '__main__':
-    main()
+    while True:
+        main()

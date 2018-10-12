@@ -11,3 +11,4 @@ HOUSE_ADDRESS = 'gemini'
 
 HOME_DIR = Path.home()
 JOBCOIN_DB = os.path.join(HOME_DIR, '.jobcoin.db.json')
+MIXING_FEE = .1
