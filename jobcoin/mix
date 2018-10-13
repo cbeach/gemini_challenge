@@ -85,17 +85,12 @@ def main():
             if balance > 0:
                 transfer(src_addr, HOUSE_ADDRESS, balance)
                 perform_transactions([HOUSE_ADDRESS] * len(i['dst']), i['dst'], normed_dist, db)
-            if len(db['pending_transactions']) > 0:
+            if len(db.get('pending_transactions', [])) > 0:
                 perform_transactions([], [], [], db)
-                
 
     except Exception as e:
         # Re-raise the exception because I'm not a jerk.
         raise e
-    finally:
-        # Make my best effort to write the db file.
-        write_db(db)
 
 if __name__ == '__main__':
-    while True:
-        main()
+    main()

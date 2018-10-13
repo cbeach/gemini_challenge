@@ -18,24 +18,23 @@ Once you're in the container you can run the following commands to test out the 
 
   --targets (optional): list of addresses that you would like the jobcoins to be sent to.
   --branching: The number of addresses to create if targets is not specified. Default is 5
-  --duration: The number of minutes to stagger the mixing over. Increases difficulty of deanonomization Default is 60.
 
-## Do the mixing transactions
+This will look at all of the deposit addresses and run the transactions through the house address and into the 
+target addresses.
 
-This will watch the deposit addresses and run the transactions as they come in.
-
-docker run -it --rm \
-  -v "$HOME/.jobcoin.db.json:/usr/src/app/.jobcoin.db.json" \
-  -e HOME=/usr/src/app/ \
-  cbeach/gemini_challenge_long_running_job
+./mix
 
 
 # Explanation
 
-I use a simple cli to create the deposit and (optionally) target accounts.
+I use a simple cli to create the deposit and (optionally) target accounts. 
+I know, I know. The instructions said to provide them, but I was going to have to 
+write a script to create them for testing purposes anyway. It just made more sense
+to roll them into the same tool. And there is still the option to provide them, so
+technically I'm still in spec.
 
-After a user deposits job coins into the deposit account a long running job starts 
-processing the transactions. First to the house account, and then to the target account.
+After a user deposits job coins into the deposit account the mix script must be run to perform
+the transactions. First to the house account, and then to the target accounts.
 I have it set up so that a deposit address can be reused.
 
 I chose 10% for a mixing fee because it's a nice round number. You can change it in the
@@ -81,13 +80,11 @@ They are done sequentially and block. In production they would be done concurren
 
 ## Rounding errors
 
- got a rounding error of 1e-14. Not worth spending time on (in the case of a non-production 
-oding challenge) but still _very_ annoying. A small part of me _swears_ that that .00000000000001 
-s mocking me.
+I got a rounding error of 1e-14. Not worth spending time on (in the case of a non-production 
+coding challenge) but still _very_ annoying. A small part of me _swears_ that that .00000000000001 
+is mocking me.
 
- would remedy this with an arbitrary precision floating point math library such as decimal 
-r mpmath. This would come with performance costs and extra work though. It's really not worth 
-hough. Even if jobcoins were worth what bitcoin was at it's highest valueation, we're still
-alking about 1e-10 dollars...
-
-
+I would remedy this with an arbitrary precision floating point math library such as decimal 
+or mpmath. This would come with performance costs and extra work though. It's really not worth 
+though. Even if jobcoins were worth what bitcoin was at it's highest valuation, we're still
+talking about 1e-10 dollars...

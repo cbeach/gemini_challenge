@@ -17,7 +17,7 @@ def create_address():
     return uuid.hex
 
 
-def create_mixer_addresses(branching_factor=5, targets=None, duration=60):
+def create_mixer_addresses(branching_factor=5, targets=None):
     """
         First create a deposit address, then create a set of target addresses.
         Write the mapping to the database (flat file in this example)
@@ -25,7 +25,6 @@ def create_mixer_addresses(branching_factor=5, targets=None, duration=60):
             branching: the number of output addresses that should be generated.
                        ignored if targets are provided
             targets: A list of addresses provided by the user.
-            duration: an integer specifying how long to spread the transfers out over
     """
 
     # Did the user specify some target accounts?
@@ -38,7 +37,6 @@ def create_mixer_addresses(branching_factor=5, targets=None, duration=60):
     addrs = {
         "src": create_address(),
         "dst": dst, 
-        "duration": duration,
     }
 
     # Check the cases for writing the db file
