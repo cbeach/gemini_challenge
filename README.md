@@ -2,11 +2,10 @@
 
 ## Create a deposit account and or a set of target accounts
 
+```sh
 touch ~/.jobcoin.db.json
-docker run -it --rm \
-  -e HOME=/usr/src/app/ \
-  -v "$HOME/.jobcoin.db.json:/usr/src/app/.jobcoin.db.json" \
-  cbeach/gemini_challenge
+docker run -it --rm -e HOME=/usr/src/app/ -v "$HOME/.jobcoin.db.json:/usr/src/app/.jobcoin.db.json" cbeach/gemini_challenge
+```
 
 The default command for the container is bash, so it will just drop you into a 
 terminal. I like this because you guys don't have to muck around with installing anything.
@@ -14,7 +13,9 @@ You can just download the container and go.
 
 Once you're in the container you can run the following commands to test out the cli portion.
 
+```sh
 ./generate_addrs [--targets <addr1> <addr2> ... ] [--branching <int>] [--duration <int>]
+```
 
   --targets (optional): list of addresses that you would like the jobcoins to be sent to.
   --branching: The number of addresses to create if targets is not specified. Default is 5
@@ -22,7 +23,9 @@ Once you're in the container you can run the following commands to test out the 
 This will look at all of the deposit addresses and run the transactions through the house address and into the 
 target addresses.
 
+```sh
 ./mix
+```
 
 
 # Explanation
